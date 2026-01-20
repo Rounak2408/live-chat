@@ -1,4 +1,10 @@
 (() => {
+  // API base URL: local = '', production = your deployed backend
+  const API_BASE =
+    window.API_BASE ||
+    ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? ''
+      : 'https://your-backend-url.onrender.com'); // TODO: replace with your real backend URL
   const registerForm = document.getElementById('registerForm');
   const errEl = document.getElementById('registerError');
 
@@ -108,7 +114,7 @@
       const submitBtn = otpVerifyForm.querySelector('button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
 
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pendingPayload)

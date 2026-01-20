@@ -1,4 +1,10 @@
 (() => {
+  // API base URL: local = '', production = your deployed backend
+  const API_BASE =
+    window.API_BASE ||
+    ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? ''
+      : 'https://your-backend-url.onrender.com'); // TODO: replace with your real backend URL
   const form = document.getElementById('loginForm');
   const emailEl = document.getElementById('loginEmail');
   const passwordEl = document.getElementById('loginPassword');
@@ -36,7 +42,7 @@
     }
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

@@ -3,6 +3,13 @@
  * Handles real-time messaging using Socket.io
  */
 
+// API base URL: local = '', production = your deployed backend
+const API_BASE =
+  window.API_BASE ||
+  ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://your-backend-url.onrender.com'); // TODO: replace with your real backend URL
+
 const token = sessionStorage.getItem('token');
 const username = sessionStorage.getItem('username');
 const userId = sessionStorage.getItem('userId');
@@ -25,7 +32,7 @@ async function ensureChatId() {
     console.warn('Invalid chatId in sessionStorage, fetching from backend...', roomId);
     
     try {
-        const response = await fetch(`/api/rooms/join/${encodeURIComponent(roomName)}`, {
+        const response = await fetch(`${API_BASE}/api/rooms/join/${encodeURIComponent(roomName)}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -92,7 +99,7 @@ async function loadMessages() {
             throw new Error('Chat ID could not be resolved');
         }
 
-        const response = await fetch(`/api/messages/${chatId}`, {
+        const response = await fetch(`${API_BASE}/api/messages/${chatId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -269,7 +276,7 @@ socket.on('error', (data) => {
 // Update online users list
 async function updateOnlineUsers() {
     try {
-        const response = await fetch('/api/users/online', {
+        const response = await fetch(`${API_BASE}/api/users/online`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

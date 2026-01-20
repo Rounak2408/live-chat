@@ -3,6 +3,13 @@
  * Handles room joining, creation, and private chat initiation
  */
 
+// API base URL: local = '', production = your deployed backend
+const API_BASE =
+  window.API_BASE ||
+  ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://your-backend-url.onrender.com'); // TODO: replace with your real backend URL
+
 const token = sessionStorage.getItem('token');
 const username = sessionStorage.getItem('username');
 const userId = sessionStorage.getItem('userId');
@@ -30,7 +37,7 @@ socket.on('connect', () => {
 // Fetch and display online users
 async function loadOnlineUsers() {
     try {
-        const response = await fetch('/api/users/online', {
+        const response = await fetch(`${API_BASE}/api/users/online`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -88,7 +95,7 @@ async function loadUserRooms() {
     if (!listEl) return;
 
     try {
-        const response = await fetch('/api/rooms', {
+        const response = await fetch(`${API_BASE}/api/rooms`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -163,7 +170,7 @@ document.getElementById('joinRoomForm').addEventListener('submit', (e) => {
     }
 
     // Join room by name via backend and get chatId
-    fetch(`/api/rooms/join/${encodeURIComponent(roomName)}`, {
+    fetch(`${API_BASE}/api/rooms/join/${encodeURIComponent(roomName)}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -205,7 +212,7 @@ document.getElementById('createRoomForm').addEventListener('submit', (e) => {
     }
 
     // Create room via API, backend will also create chat and return chatId
-    fetch('/api/rooms', {
+    fetch(`${API_BASE}/api/rooms`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -310,7 +317,7 @@ function closeFriendModal() {
 
 async function loadAllUsers() {
     try {
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_BASE}/api/users`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -368,7 +375,7 @@ function renderFriendResults(query) {
         btn.addEventListener('click', async () => {
             if (btn.classList.contains('added')) return;
             try {
-                const res = await fetch('/api/friends/requests', {
+                const res = await fetch(`${API_BASE}/api/friends/requests`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -456,7 +463,7 @@ async function loadPendingRequests() {
     if (!pendingListEl) return;
 
     try {
-        const res = await fetch('/api/friends/requests', {
+        const res = await fetch(`${API_BASE}/api/friends/requests`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -495,7 +502,7 @@ async function loadPendingRequests() {
             acceptBtn.textContent = 'Accept';
             acceptBtn.addEventListener('click', async () => {
                 try {
-                    await fetch(`/api/friends/requests/${req._id}/accept`, {
+                    await fetch(`${API_BASE}/api/friends/requests/${req._id}/accept`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -511,7 +518,7 @@ async function loadPendingRequests() {
             rejectBtn.textContent = 'Reject';
             rejectBtn.addEventListener('click', async () => {
                 try {
-                    await fetch(`/api/friends/requests/${req._id}/reject`, {
+                    await fetch(`${API_BASE}/api/friends/requests/${req._id}/reject`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
