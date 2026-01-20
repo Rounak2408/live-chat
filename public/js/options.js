@@ -8,7 +8,7 @@ const API_BASE =
   window.API_BASE ||
   ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? ''
-    : 'https://your-backend-url.onrender.com'); // TODO: replace with your real backend URL
+    : 'https://live-chat-1-1ku0.onrender.com');
 
 const token = sessionStorage.getItem('token');
 const username = sessionStorage.getItem('username');
