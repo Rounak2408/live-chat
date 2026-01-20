@@ -19,25 +19,30 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// CORS origin: allow all origins (no cookies used, so this is OK here)
-const ALLOWED_ORIGIN = '*';
+/**
+ * CORS (TEMP: allow all origins to guarantee fix)
+ * Note: credentials must be false when origin is "*"
+ * IMPORTANT: CORS middleware must be registered before routes.
+ */
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+  optionsSuccessStatus: 204
+};
 
-// Socket.io setup with CORS
-const io = socketIo(server, {
-  cors: {
-    origin: ALLOWED_ORIGIN,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: false
-  }
-});
+// CORS MUST be before routes
+app.use(cors(corsOptions));
+// Global preflight support
+app.options('*', cors(corsOptions));
 
-// Middleware
-app.use(cors({
-  origin: ALLOWED_ORIGIN,
-  credentials: false
-}));
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Socket.io setup with matching CORS
+const io = socketIo(server, { cors: corsOptions });
 
 // Serve frontend static files (HTML, CSS, JS)
 // This will serve files from the /public folder at the root URL
