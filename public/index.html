@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat - Real-Time Messaging</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="discord-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">💬</span>
+                <span class="logo-text">Live Chat</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#docs" class="nav-link">Docs</a>
+            </div>
+            <div class="nav-actions">
+                <button type="button" class="btn-login" onclick="window.location.href='/login.html'">Login</button>
+            </div>
+            <button class="nav-burger" id="navBurger" aria-label="Open menu">☰</button>
+        </div>
+        <div class="nav-mobile-menu" id="navMobileMenu">
+            <a href="#features" class="nav-mobile-link">Features</a>
+            <a href="#about" class="nav-mobile-link">About</a>
+            <a href="#docs" class="nav-mobile-link">Docs</a>
+            <button type="button" class="nav-mobile-btn" onclick="window.location.href='/login.html'">Login</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-aurora"></div>
+        <div class="hero-objects">
+            <span class="orb orb-1"></span>
+            <span class="orb orb-2"></span>
+            <span class="orb orb-3"></span>
+            <span class="glow-ring ring-1"></span>
+            <span class="glow-ring ring-2"></span>
+            <span class="hero-starfield"></span>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content scroll-reveal">
+                <h1 class="hero-title">GROUP CHAT THAT'S ALL FUN &amp; GAMES</h1>
+                <p class="hero-description">
+                    Live Chat is where you can create rooms for your communities, friends, and teams.
+                    Where you can hang out, talk, and chat in real-time.
+                </p>
+                <div class="hero-buttons">
+                    <button type="button" class="btn-hero btn-primary" onclick="window.location.href='/login.html'">Open Live Chat</button>
+                    <button type="button" class="btn-hero btn-secondary" onclick="window.open('https://github.com', '_blank')">View on GitHub</button>
+                </div>
+            </div>
+            <div class="hero-image scroll-reveal">
+                <div class="hero-art">
+                    <div class="hero-art-bg"></div>
+                    <div class="hero-art-characters" role="presentation"></div>
+                    <div class="hero-art-shadow"></div>
+                    <div class="hero-floating-card">
+                        <div class="chat-mockup">
+                            <div class="mockup-header">
+                                <div class="mockup-dot"></div>
+                                <div class="mockup-dot"></div>
+                                <div class="mockup-dot"></div>
+                            </div>
+                            <div class="mockup-content">
+                                <div class="mockup-message">
+                                    <div class="mockup-avatar"></div>
+                                    <div class="mockup-text">
+                                        <div class="mockup-name">Alice</div>
+                                        <div class="mockup-msg">Hey everyone! 👋</div>
+                                    </div>
+                                </div>
+                                <div class="mockup-message">
+                                    <div class="mockup-avatar"></div>
+                                    <div class="mockup-text">
+                                        <div class="mockup-name">Bob</div>
+                                        <div class="mockup-msg">What's up? Ready to chat?</div>
+                                    </div>
+                                </div>
+                                <div class="mockup-message">
+                                    <div class="mockup-avatar"></div>
+                                    <div class="mockup-text">
+                                        <div class="mockup-name">Charlie</div>
+                                        <div class="mockup-msg">Let's go! 🚀</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Sections -->
+    <section class="feature-section" id="features">
+        <div class="feature-container">
+            <div class="feature-content scroll-reveal">
+                <h2 class="feature-title">MAKE YOUR GROUP CHATS MORE FUN</h2>
+                <p class="feature-description">
+                    The possibilities are endless. Share messages, talk about your day, or just hang out.
+                    The fun never stops when you're with your friends on Live Chat. Create rooms for your
+                    communities, friends, and teams.
+                </p>
+            </div>
+            <div class="feature-image scroll-reveal">
+                <div class="feature-mockup">
+                    <div class="mockup-room">
+                        <div class="room-header"># general</div>
+                        <div class="room-messages">
+                            <div class="room-msg">Welcome to the room!</div>
+                            <div class="room-msg">Start chatting...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section feature-reverse">
+        <div class="feature-container">
+            <div class="feature-image scroll-reveal">
+                <div class="feature-mockup">
+                    <div class="mockup-online">
+                        <div class="online-header">Online Users</div>
+                        <div class="online-list">
+                            <div class="online-user"><span class="status-dot"></span> Alice</div>
+                            <div class="online-user"><span class="status-dot"></span> Bob</div>
+                            <div class="online-user"><span class="status-dot"></span> Charlie</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-content scroll-reveal">
+                <h2 class="feature-title">SEE WHO'S AROUND TO CHILL</h2>
+                <p class="feature-description">
+                    Live Chat shows you who's online and what they're up to. See who's in rooms,
+                    chatting, or just hanging out. It's easy to find someone to chat with.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-section">
+        <div class="feature-container">
+            <div class="feature-content scroll-reveal">
+                <h2 class="feature-title">REAL-TIME MESSAGING INSTANTLY</h2>
+                <p class="feature-description">
+                    With Socket.io, your messages are delivered instantly. No delays, no waiting.
+                    It's like being in the same room, even when you're miles apart. Built with
+                    Node.js, Express, and MongoDB for reliability.
+                </p>
+            </div>
+            <div class="feature-image scroll-reveal">
+                <div class="feature-mockup">
+                    <div class="mockup-realtime">
+                        <div class="realtime-indicator">⚡ Real-time</div>
+                        <div class="realtime-messages">
+                            <div class="rt-msg incoming">Message received!</div>
+                            <div class="rt-msg outgoing">Reply sent instantly</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="discord-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">💬 Live Chat</span>
+                <p class="footer-tagline">Real-time messaging for everyone</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#about">About</a>
+                    <a href="#docs">Documentation</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <a href="#support">Support</a>
+                    <a href="#github">GitHub</a>
+                    <a href="#blog">Blog</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Built With</h4>
+                    <span>Node.js</span>
+                    <span>Express</span>
+                    <span>Socket.io</span>
+                    <span>MongoDB</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Live Chat. Built for real-time communication.</p>
+        </div>
+    </footer>
+
+    <!-- No auth scripts on landing page; login handled on /login.html -->
+    <script src="/js/landing-animations.js"></script>
+    <script src="/js/nav.js"></script>
+</body>
+</html>

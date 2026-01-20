@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Options - Real-Time Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="livechat-app">
+        <!-- Left: servers -->
+        <aside class="discord-guilds">
+            <div class="guild-pill guild-home" title="Home">💬</div>
+            <div class="guild-sep"></div>
+            <div class="guild-pill" title="Friends">👥</div>
+            <div class="guild-pill" title="Rooms">#</div>
+        </aside>
+
+        <!-- Middle: channels / DMs -->
+        <aside class="discord-sidebar">
+            <div class="sidebar-top">
+                <input class="sidebar-search" placeholder="Find or start a conversation" />
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-item is-active">
+                    <span class="sidebar-icon">👥</span>
+                    <span>Friends</span>
+                </div>
+                <div class="sidebar-item">
+                    <span class="sidebar-icon">⭐</span>
+                    <span>Nitro</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>Direct Messages</span>
+                    <span class="sidebar-plus">+</span>
+                </div>
+                <div id="onlineUsersList" class="dm-list">
+                    <div class="dm-empty">Loading online users...</div>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-dot"></div>
+                <div class="user-meta">
+                    <div class="user-name" id="usernameDisplay"></div>
+                    <div class="user-sub">Online</div>
+                </div>
+                <button class="user-btn" id="logoutBtn" type="button" title="Logout">⎋</button>
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="discord-main">
+            <header class="main-header">
+                <div class="main-title">
+                    <span class="main-title-icon">👥</span>
+                    <span>Friends</span>
+                </div>
+                <div class="main-tabs">
+                    <button class="tab is-active" type="button" id="tabOnline">Online</button>
+                    <button class="tab" type="button" id="tabAll">All</button>
+                    <button class="tab" type="button" id="tabPending">Pending</button>
+                    <button class="tab tab-primary" type="button" id="addFriendTab">Add Friend</button>
+                </div>
+                <button class="tabs-burger" id="tabsBurger" aria-label="Open filters">☰</button>
+                <div class="tabs-mobile-menu" id="tabsMobileMenu">
+                    <button class="tabs-mobile-item" data-target="tabOnline" type="button">Online</button>
+                    <button class="tabs-mobile-item" data-target="tabAll" type="button">All</button>
+                    <button class="tabs-mobile-item" data-target="tabPending" type="button">Pending</button>
+                    <button class="tabs-mobile-item tabs-mobile-add" data-target="addFriendTab" type="button">Add Friend</button>
+                </div>
+            </header>
+
+            <section class="main-content">
+                <div class="friends-empty">
+                    <div class="friends-empty-title">There are no friends online at this time.</div>
+                    <div class="friends-empty-sub">Check back later, or start a room chat.</div>
+                </div>
+
+                <div id="pendingSection" class="pending-section is-hidden">
+                    <h3 class="pending-title">Pending Friend Requests</h3>
+                    <div id="pendingRequestsList" class="pending-list">
+                        <div class="pending-empty">You have no pending requests.</div>
+                    </div>
+                </div>
+
+                <div class="room-actions">
+                    <div class="action-card">
+                        <div class="action-title">Join Room</div>
+                        <div class="action-sub">Join an existing group chat room</div>
+                        <form id="joinRoomForm" class="action-form">
+                            <input type="text" id="joinRoomName" placeholder="Enter room name" required>
+                            <button type="submit" class="action-btn">Join</button>
+                        </form>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-title">Create Room</div>
+                        <div class="action-sub">Create a new group chat room</div>
+                        <form id="createRoomForm" class="action-form">
+                            <input type="text" id="createRoomName" placeholder="Enter new room name" required>
+                            <button type="submit" class="action-btn action-btn-green">Create</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="rooms-list-section">
+                    <div class="rooms-list-header">
+                        <span>Your Rooms</span>
+                    </div>
+                    <div id="userRoomsList" class="rooms-list">
+                        <div class="rooms-empty">You haven't joined any rooms yet.</div>
+                    </div>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+            </section>
+        </main>
+
+        <!-- Right: active now -->
+        <aside class="discord-right">
+            <div class="right-title">Active Now</div>
+            <div class="right-card">
+                <div class="right-card-title">It's quiet for now…</div>
+                <div class="right-card-sub">
+                    When a friend starts an activity—like playing a game or hanging out on voice—we'll show it here!
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Add Friend modal -->
+    <div class="friend-modal is-hidden" id="friendModal" aria-hidden="true">
+        <div class="friend-modal__backdrop"></div>
+        <div class="friend-modal__panel" role="dialog" aria-modal="true" aria-labelledby="friendModalTitle">
+            <div class="friend-modal__header">
+                <h3 id="friendModalTitle">Add Friend</h3>
+                <button type="button" class="friend-modal__close" id="friendModalClose" aria-label="Close">×</button>
+            </div>
+            <p class="friend-modal__sub">You can search for a user by name.</p>
+            <input type="text" id="friendSearchInput" class="friend-modal__search" placeholder="Enter a username..." autocomplete="off" />
+            <div id="friendResults" class="friend-results">
+                <div class="friend-results-empty">Type a name to search users.</div>
+            </div>
+            <div id="friendModalError" class="error-message"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/options.js"></script>
+</body>
+</html>

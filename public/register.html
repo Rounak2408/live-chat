@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat - Register</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="register-page">
+    <!-- Minimal nav for register page -->
+    <nav class="discord-nav">
+        <div class="nav-container">
+            <div class="nav-logo" onclick="window.location.href='/'" style="cursor:pointer;">
+                <span class="logo-icon">💬</span>
+                <span class="logo-text">Live Chat</span>
+            </div>
+            <div class="nav-actions">
+                <button type="button" class="btn-login" onclick="window.location.href='/login.html'">Log in</button>
+            </div>
+            <button class="nav-burger" id="navBurger" aria-label="Open menu">☰</button>
+        </div>
+        <div class="nav-mobile-menu" id="navMobileMenu">
+            <button type="button" class="nav-mobile-btn" onclick="window.location.href='/login.html'">Log in</button>
+        </div>
+    </nav>
+
+    <section class="signin-section" id="register">
+        <div class="signin-container">
+            <div class="signin-card">
+                <h2 class="signin-title">Create an account</h2>
+
+                <form id="registerForm" class="signin-form">
+                    <div class="form-group">
+                        <label for="regEmail">Email <span class="req">*</span></label>
+                        <input type="email" id="regEmail" name="email" placeholder="you@example.com" autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regDisplay">Display Name</label>
+                        <input type="text" id="regDisplay" name="displayName" placeholder="Optional" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regUsername">Username <span class="req">*</span></label>
+                        <input type="text" id="regUsername" name="username" placeholder="e.g. rounak_07" autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPassword">Password <span class="req">*</span></label>
+                        <input type="password" id="regPassword" name="password" placeholder="Password" autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Birth <span class="req">*</span></label>
+                        <div class="dob-row">
+                            <select aria-label="Month" required>
+                                <option value="" disabled selected>Month</option>
+                                <option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option>
+                                <option>May</option><option>Jun</option><option>Jul</option><option>Aug</option>
+                                <option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option>
+                            </select>
+                            <select aria-label="Day" required>
+                                <option value="" disabled selected>Day</option>
+                                <option>01</option><option>02</option><option>03</option><option>04</option><option>05</option>
+                                <option>06</option><option>07</option><option>08</option><option>09</option><option>10</option>
+                                <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+                                <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+                                <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+                                <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option>
+                            </select>
+                            <select aria-label="Year" required>
+                                <option value="" disabled selected>Year</option>
+                                <option>2008</option><option>2007</option><option>2006</option><option>2005</option><option>2004</option>
+                                <option>2003</option><option>2002</option><option>2001</option><option>2000</option><option>1999</option>
+                                <option>1998</option><option>1997</option><option>1996</option><option>1995</option><option>1994</option>
+                                <option>1993</option><option>1992</option><option>1991</option><option>1990</option><option>1989</option>
+                                <option>1988</option><option>1987</option><option>1986</option><option>1985</option><option>1984</option>
+                                <option>1983</option><option>1982</option><option>1981</option><option>1980</option><option>1979</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="marketingOpt" name="marketingOpt">
+                        <label for="marketingOpt">(Optional) Send me product tips & special offers.</label>
+                    </div>
+
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the Terms of Service and Privacy Policy.</label>
+                    </div>
+
+                    <button type="submit" class="btn-signin">Create Account</button>
+                    <div class="fineprint auth-note">Already have an account? <a class="link-muted" href="/login.html">Log in</a></div>
+                </form>
+
+                <div id="registerError" class="error-message"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- OTP Modal -->
+    <div class="otp-modal is-hidden" id="otpModal" aria-hidden="true">
+        <div class="otp-modal__backdrop"></div>
+        <div class="otp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
+            <div class="otp-modal__header">
+                <h3 id="otpTitle">OTP Verification</h3>
+                <button type="button" class="otp-modal__close" id="otpCloseBtn" aria-label="Close">×</button>
+            </div>
+            <p class="otp-modal__sub">Auto-generated OTP (demo):</p>
+            <div class="otp-modal__code" id="otpCode"></div>
+
+            <form id="otpVerifyForm" class="signin-form">
+                <div class="form-group">
+                    <label for="otpInputModal">Enter OTP <span class="req">*</span></label>
+                    <input type="text" id="otpInputModal" maxlength="6" placeholder="4–6 digits" autocomplete="off" required>
+                </div>
+                <button type="submit" class="btn-signin btn-success">Verify &amp; Register</button>
+                <div class="fineprint">Tip: copy OTP shown above.</div>
+            </form>
+            <div id="otpError" class="error-message"></div>
+        </div>
+    </div>
+
+    <script src="js/register.js"></script>
+    <script src="/js/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room - Real-Time Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="chat-app">
+        <aside class="chat-left">
+            <div class="chat-left-top">
+                <div class="chat-room-badge">
+                    <div class="chat-hash">#</div>
+                    <div class="chat-room-meta">
+                        <div class="chat-room-name" id="roomNameDisplay">Loading...</div>
+                        <div class="chat-room-sub">Text Channel</div>
+                    </div>
+                </div>
+                <a class="chat-back" href="/options.html">← Back</a>
+            </div>
+
+            <div class="chat-left-section">
+                <div class="chat-left-title">Online</div>
+                <div id="onlineUsersList" class="chat-user-list">
+                    <div class="chat-user-empty">Loading...</div>
+                </div>
+            </div>
+
+            <div class="chat-left-section">
+                <div class="chat-left-title">In This Room</div>
+                <div id="roomUsersList" class="chat-user-list">
+                    <div class="chat-user-empty">Loading...</div>
+                </div>
+            </div>
+
+            <div class="chat-left-footer">
+                <button id="leaveRoomBtn" class="chat-danger" type="button">Leave Room</button>
+            </div>
+        </aside>
+
+        <main class="chat-main">
+            <header class="chat-topbar">
+                <div class="chat-topbar-title">
+                    <span class="chat-hash">#</span>
+                    <span id="chatRoomTitle">Chat</span>
+                </div>
+                <div class="chat-topbar-sub" id="chatRoomSubtitle">Real-time messaging</div>
+            </header>
+
+            <section class="chat-messages" id="messagesContainer">
+                <div class="loading">Loading messages...</div>
+            </section>
+
+            <footer class="chat-composer">
+                <form id="messageForm" class="chat-form">
+                    <input type="text" id="messageInput" placeholder="Message..." autocomplete="off" required>
+                    <button type="button" class="chat-mic" id="mainMicBtn" title="Voice input">🎤</button>
+                    <button type="submit" class="chat-send">Send</button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <!-- User profile modal -->
+    <div class="user-modal is-hidden" id="userProfileModal" aria-hidden="true">
+        <div class="user-modal__backdrop"></div>
+        <div class="user-modal__panel" role="dialog" aria-modal="true" aria-labelledby="userProfileTitle">
+            <div class="user-modal__header">
+                <div class="user-modal__avatar" id="profileAvatar"></div>
+                <div class="user-modal__meta">
+                    <h3 id="userProfileTitle" class="user-modal__name">User</h3>
+                    <p class="user-modal__sub" id="userProfileEmail"></p>
+                </div>
+                <button type="button" class="user-modal__close" id="userProfileClose" aria-label="Close">×</button>
+            </div>
+
+            <div class="user-modal__actions">
+                <button type="button" class="user-modal__btn" id="addFriendBtn">Add Friend</button>
+                <button type="button" class="user-modal__btn user-modal__btn-primary" id="startDmBtn">Message</button>
+            </div>
+
+            <div class="user-modal__dm">
+                <form id="userDmForm" class="user-modal__dm-form">
+                    <input type="text" id="userDmInput" placeholder="Message this user..." autocomplete="off">
+                    <button type="button" class="user-modal__mic" id="userDmMic" title="Voice input">🎤</button>
+                    <button type="submit" class="user-modal__send">Send</button>
+                </form>
+                <div id="userProfileError" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>

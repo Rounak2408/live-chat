@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+    <!-- Minimal nav for login page -->
+    <nav class="discord-nav">
+        <div class="nav-container">
+            <div class="nav-logo" onclick="window.location.href='/'" style="cursor:pointer;">
+                <span class="logo-icon">💬</span>
+                <span class="logo-text">Live Chat</span>
+            </div>
+            <div class="nav-actions">
+                <button type="button" class="btn-login" onclick="window.location.href='/'">Back to Home</button>
+            </div>
+            <button class="nav-burger" id="navBurger" aria-label="Open menu">☰</button>
+        </div>
+        <div class="nav-mobile-menu" id="navMobileMenu">
+            <button type="button" class="nav-mobile-btn" onclick="window.location.href='/'">Back to Home</button>
+        </div>
+    </nav>
+
+    <!-- Login -->
+    <section class="signin-section" id="signin">
+        <div class="signin-container">
+            <div class="signin-card">
+                <div class="login-left">
+                    <h2 class="signin-title">Welcome back!</h2>
+                    <p class="signin-subtitle">We&apos;re so excited to see you again!</p>
+
+                    <form id="loginForm" class="signin-form">
+                        <div class="form-group">
+                            <label for="loginEmail">Email <span class="req">*</span></label>
+                            <input type="email" id="loginEmail" name="email" required
+                                   placeholder="you@example.com" autocomplete="off">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword">Password <span class="req">*</span></label>
+                            <input type="password" id="loginPassword" name="password" required
+                                   placeholder="Password" autocomplete="off">
+                        </div>
+
+                        <button type="submit" class="btn-signin">Log In</button>
+                        <div class="fineprint">Need an account? <a class="link-muted" href="/register.html">Register</a></div>
+                    </form>
+
+                    <div id="errorMessage" class="error-message"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="js/login.js"></script>
+    <script src="/js/nav.js"></script>
+</body>
+</html>
