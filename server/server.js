@@ -19,8 +19,8 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// CORS origin: allow specific frontend (Render env) or fallback to *
-const ALLOWED_ORIGIN = process.env.CLIENT_URL || '*';
+// CORS origin: allow all origins (no cookies used, so this is OK here)
+const ALLOWED_ORIGIN = '*';
 
 // Socket.io setup with CORS
 const io = socketIo(server, {
