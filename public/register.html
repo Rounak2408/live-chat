@@ -10,14 +10,14 @@
     <!-- Minimal nav for register page -->
     <nav class="discord-nav">
         <div class="nav-container">
-            <div class="nav-logo" onclick="window.location.href='/'" style="cursor:pointer;">
+            <div class="nav-logo nav-logo--clickable" onclick="window.location.href='/'">
                 <span class="logo-icon">💬</span>
                 <span class="logo-text">Live Chat</span>
             </div>
             <div class="nav-actions">
                 <button type="button" class="btn-login" onclick="window.location.href='/login.html'">Log in</button>
             </div>
-            <button class="nav-burger" id="navBurger" aria-label="Open menu">☰</button>
+            <button type="button" class="nav-burger" id="navBurger" aria-label="Open menu">☰</button>
         </div>
         <div class="nav-mobile-menu" id="navMobileMenu">
             <button type="button" class="nav-mobile-btn" onclick="window.location.href='/login.html'">Log in</button>
@@ -82,7 +82,7 @@
 
                     <div class="checkbox-row">
                         <input type="checkbox" id="marketingOpt" name="marketingOpt">
-                        <label for="marketingOpt">(Optional) Send me product tips & special offers.</label>
+                        <label for="marketingOpt">(Optional) Send me product tips &amp; special offers.</label>
                     </div>
 
                     <div class="checkbox-row">
@@ -98,29 +98,6 @@
             </div>
         </div>
     </section>
-
-    <!-- OTP Modal -->
-    <div class="otp-modal is-hidden" id="otpModal" aria-hidden="true">
-        <div class="otp-modal__backdrop"></div>
-        <div class="otp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="otpTitle">
-            <div class="otp-modal__header">
-                <h3 id="otpTitle">OTP Verification</h3>
-                <button type="button" class="otp-modal__close" id="otpCloseBtn" aria-label="Close">×</button>
-            </div>
-            <p class="otp-modal__sub">Auto-generated OTP (demo):</p>
-            <div class="otp-modal__code" id="otpCode"></div>
-
-            <form id="otpVerifyForm" class="signin-form">
-                <div class="form-group">
-                    <label for="otpInputModal">Enter OTP <span class="req">*</span></label>
-                    <input type="text" id="otpInputModal" maxlength="6" placeholder="4–6 digits" autocomplete="off" required>
-                </div>
-                <button type="submit" class="btn-signin btn-success">Verify &amp; Register</button>
-                <div class="fineprint">Tip: copy OTP shown above.</div>
-            </form>
-            <div id="otpError" class="error-message"></div>
-        </div>
-    </div>
 
     <script src="js/register.js"></script>
     <script src="/js/nav.js"></script>

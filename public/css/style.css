@@ -1084,6 +1084,10 @@ body.login-page .signin-container {
     letter-spacing: 0.4px;
 }
 
+.nav-logo--clickable {
+    cursor: pointer;
+}
+
 .logo-icon {
     font-size: 24px;
 }
