@@ -19,19 +19,22 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
+// CORS origin: allow specific frontend (Render env) or fallback to *
+const ALLOWED_ORIGIN = process.env.CLIENT_URL || '*';
+
 // Socket.io setup with CORS
 const io = socketIo(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "*",
+    origin: ALLOWED_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: false
   }
 });
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",
-  credentials: true
+  origin: ALLOWED_ORIGIN,
+  credentials: false
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
