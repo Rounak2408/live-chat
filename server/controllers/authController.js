@@ -5,6 +5,7 @@
 
 const User = require('../models/User');
 const UserStatus = require('../models/UserStatus');
+const OTP = require('../models/OTP');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRE } = require('../config/jwt');
 
@@ -38,6 +39,29 @@ exports.register = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'User already exists with this email'
+      });
+    }
+
+    // Check if email is verified with OTP
+    const verifiedOTP = await OTP.findOne({
+      email: email.toLowerCase(),
+      verified: true
+    }).sort({ createdAt: -1 });
+
+    if (!verifiedOTP) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email not verified. Please verify your email with OTP first.'
+      });
+    }
+
+    // Check if OTP verification is recent (within last 30 minutes)
+    const otpAge = Date.now() - verifiedOTP.createdAt.getTime();
+    const maxAge = 30 * 60 * 1000; // 30 minutes
+    if (otpAge > maxAge) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP verification expired. Please verify your email again.'
       });
     }
 
