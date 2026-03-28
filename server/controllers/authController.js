@@ -120,6 +120,18 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error('Register Error:', error);
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors)
+        .map((e) => e.message)
+        .join(' ');
+      return res.status(400).json({ success: false, message: msg });
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
+      });
+    }
     res.status(500).json({
       success: false,
       message: 'Server error during registration',

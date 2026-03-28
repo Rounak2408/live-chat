@@ -109,10 +109,20 @@
             body: JSON.stringify(pendingRegistration)
           });
 
-          const registerData = await registerRes.json().catch(() => ({}));
+          let registerData = {};
+          try {
+            const t = await registerRes.text();
+            registerData = t ? JSON.parse(t) : {};
+          } catch {
+            registerData = {};
+          }
           
           if (!registerRes.ok || !registerData.success) {
-            otpErrorEl.textContent = registerData.message || 'Registration failed. Please try again.';
+            otpErrorEl.textContent =
+              registerData.message ||
+              (registerRes.status >= 500
+                ? 'Server error. Try again.'
+                : `Registration failed (${registerRes.status}).`);
             otpErrorEl.classList.add('show');
             verifyBtn.disabled = false;
             verifyBtn.textContent = 'Verify & Create Account';
@@ -185,12 +195,38 @@
         body: JSON.stringify(pendingRegistration)
       });
 
-      const data = await res.json().catch(() => ({}));
+      const rawText = await res.text();
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch (parseErr) {
+        console.error('Register response not JSON:', res.status, rawText.slice(0, 200));
+        showError(
+          res.ok
+            ? 'Server sent invalid response. Check that the API URL is correct.'
+            : `Server error (${res.status}). Is the backend running?`
+        );
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Account';
+        }
+        return;
+      }
 
-      // Check if OTP is required
-      if (data.requiresOTP && data.data && data.data.otp) {
-        // Show OTP modal with generated OTP
-        showOTPModal(data.data.otp, email);
+      const otpCode = data.data && (data.data.otp ?? data.data.code);
+
+      // OTP step: server returns 200 with requiresOTP (success may be false)
+      if (data.requiresOTP === true && otpCode) {
+        showOTPModal(String(otpCode), email);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Account';
+        }
+        return;
+      }
+
+      if (data.requiresOTP === true && !otpCode) {
+        showError(data.message || 'Could not get verification code. Try again in a moment.');
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Create Account';
@@ -199,7 +235,10 @@
       }
 
       if (!res.ok || !data.success) {
-        showError(data.message || 'Registration failed.');
+        showError(
+          data.message ||
+            (res.status >= 500 ? 'Server error. Try again later.' : `Registration failed (${res.status}).`)
+        );
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Create Account';
