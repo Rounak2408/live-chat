@@ -816,13 +816,13 @@ body::after {
     z-index: 1;
 }
 
-/* Row alignment: your messages left, others right */
+/* Row alignment: your messages right, others left (WhatsApp-style) */
 .chat-messages > .chat-msg.is-me {
-    align-self: flex-start;
+    align-self: flex-end;
 }
 
 .chat-messages > .chat-msg.is-them {
-    align-self: flex-end;
+    align-self: flex-start;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -859,20 +859,20 @@ body::after {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* Others: avatar on the right, text right-aligned */
-.chat-msg.is-them {
+/* Yours: avatar on the right, text right-aligned */
+.chat-msg.is-me {
     flex-direction: row-reverse;
 }
 
-.chat-msg.is-them .chat-msg-body {
+.chat-msg.is-me .chat-msg-body {
     text-align: right;
 }
 
-.chat-msg.is-them .chat-msg-head {
+.chat-msg.is-me .chat-msg-head {
     justify-content: flex-end;
 }
 
-.chat-msg.is-them .chat-msg-meta {
+.chat-msg.is-me .chat-msg-meta {
     justify-content: flex-end;
 }
 
