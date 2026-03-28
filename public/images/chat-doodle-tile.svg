@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <title>Chat doodle tile</title>
+  <g fill="none" stroke="#7a8088" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round" opacity="0.38">
+    <!-- sun -->
+    <circle cx="28" cy="32" r="7"/>
+    <path d="M28 22v3M28 39v3M18 32h3M35 32h3M21 24l2 2M33 40l2 2M21 40l2-2M33 24l2-2"/>
+    <!-- cloud -->
+    <path d="M78 28c-4 0-8 3-8 7 0 5 4 9 9 9h22c5 0 9-4 9-9 0-4-3-7-7-8 0-5-5-9-11-9-4 0-8 2-10 5-2-1-4-2-6-2z"/>
+    <!-- heart -->
+    <path d="M152 36c-6-6-16-2-16 6 0 8 16 18 16 18s16-10 16-18c0-8-10-12-16-6z"/>
+    <!-- star -->
+    <path d="M42 88l2.5 5 5.5.8-4 3.8 1 5.4-4.9-2.6-4.9 2.6 1-5.4-4-3.8 5.5-.8z"/>
+    <!-- coffee -->
+    <path d="M118 78h14v18c0 4-3 7-7 7h-8c-4 0-7-3-7-7V78z"/>
+    <path d="M132 84h4c2 0 4 2 4 4s-2 4-4 4h-4"/>
+    <path d="M112 96h-4"/>
+    <!-- house -->
+    <path d="M178 88l-12-10v-6h-8v4l-10-8-18 15v28h38V97"/>
+    <path d="M162 109v16h-20v-16"/>
+    <!-- moon -->
+    <path d="M22 118a12 12 0 1 0 10 18 10 10 0 0 1-10-18z"/>
+    <!-- tree -->
+    <path d="M94 128v22M94 128c-8-6-8-16 0-22 8 6 8 16 0 22M88 150h12"/>
+    <!-- note -->
+    <path d="M158 118v24l8-4v-24M158 138l8-4"/>
+    <!-- ball -->
+    <circle cx="52" cy="162" r="9"/>
+    <path d="M46 156c6 4 12 4 18 0M52 153v18"/>
+    <!-- fish -->
+    <path d="M168 158c-8 0-14 4-14 9s6 9 14 9l6-9-6-9z"/>
+    <circle cx="166" cy="167" r="1.2" fill="#7a8088" stroke="none"/>
+    <!-- flower -->
+    <circle cx="128" cy="158" r="3"/>
+    <ellipse cx="128" cy="150" rx="3" ry="5"/>
+    <ellipse cx="128" cy="166" rx="3" ry="5"/>
+    <ellipse cx="120" cy="158" rx="5" ry="3"/>
+    <ellipse cx="136" cy="158" rx="5" ry="3"/>
+    <!-- book -->
+    <path d="M12 78h16v28H12c-4 0-6-2-6-6V84c0-4 2-6 6-6z"/>
+    <path d="M28 78h16v28H28"/>
+    <!-- mountain -->
+    <path d="M72 168l14-22 10 14 8-10 16 18H72z"/>
+    <!-- speech -->
+    <path d="M188 48c0 6-5 11-11 11h-6l-4 6v-6h-2c-6 0-11-5-11-11s5-11 11-11h12c6 0 11 5 11 11z"/>
+    <!-- rocket -->
+    <path d="M32 168l4-16 8 8-4 8-8 0z"/>
+    <path d="M44 160l6-12 2 10"/>
+    <!-- pizza -->
+    <path d="M8 128l18 32 18-32c-6-4-12-4-18 0-6-4-12-4-18 0z"/>
+    <circle cx="20" cy="142" r="1.5" fill="#7a8088" stroke="none"/>
+    <circle cx="32" cy="150" r="1.5" fill="#7a8088" stroke="none"/>
+    <!-- lock -->
+    <rect x="172" y="128" width="14" height="12" rx="2"/>
+    <path d="M175 128v-5c0-3 2-5 5-5s5 2 5 5v5"/>
+    <!-- extra small fillers for density -->
+    <circle cx="100" cy="42" r="2"/>
+    <path d="M60 52l4 4M64 52l-4 4"/>
+    <path d="M140 92h8M144 88v8"/>
+    <circle cx="182" cy="178" r="2.5"/>
+    <path d="M8 48c3 0 5 2 5 5s-2 5-5 5"/>
+    <path d="M108 178c0-4 3-7 7-7s7 3 7 7"/>
+  </g>
+</svg>
