@@ -4,11 +4,7 @@
  */
 
 // API base URL: local = '', production = your deployed backend
-const API_BASE =
-  window.API_BASE ||
-  ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-    ? ''
-    : 'https://live-chat-1-1ku0.onrender.com');
+const API_BASE = typeof window.API_BASE === 'string' ? window.API_BASE : '';
 
 const token = sessionStorage.getItem('token');
 const username = sessionStorage.getItem('username');
@@ -115,8 +111,34 @@ async function loadUserRooms() {
         }
 
         rooms.forEach(room => {
-            const chatIdRaw = room.chatId && (room.chatId._id || room.chatId);
-            const chatId = typeof chatIdRaw === 'string' ? chatIdRaw : (chatIdRaw ? String(chatIdRaw) : '');
+            // Extract chatId properly - handle both object and string formats
+            let chatId = null;
+            const chatIdRaw = room.chatId;
+            
+            if (chatIdRaw) {
+                if (typeof chatIdRaw === 'string' && /^[0-9a-fA-F]{24}$/.test(chatIdRaw)) {
+                    chatId = chatIdRaw;
+                } else if (typeof chatIdRaw === 'object') {
+                    // Try _id first
+                    if (chatIdRaw._id) {
+                        const id = typeof chatIdRaw._id === 'string' ? chatIdRaw._id : 
+                                  (chatIdRaw._id.toString ? chatIdRaw._id.toString() : String(chatIdRaw._id));
+                        if (/^[0-9a-fA-F]{24}$/.test(id)) {
+                            chatId = id;
+                        }
+                    } else if (chatIdRaw.toString) {
+                        const id = chatIdRaw.toString();
+                        if (/^[0-9a-fA-F]{24}$/.test(id)) {
+                            chatId = id;
+                        }
+                    }
+                } else {
+                    const strId = String(chatIdRaw);
+                    if (/^[0-9a-fA-F]{24}$/.test(strId)) {
+                        chatId = strId;
+                    }
+                }
+            }
 
             const item = document.createElement('div');
             item.className = 'room-item';
@@ -139,8 +161,10 @@ async function loadUserRooms() {
                     showError('This room is not ready yet.');
                     return;
                 }
+                // Always store as string ID only
                 sessionStorage.setItem('roomName', room.roomName);
                 sessionStorage.setItem('roomId', chatId);
+                console.log('Stored roomId as string:', chatId);
                 window.location.href = '/chat.html';
             });
 

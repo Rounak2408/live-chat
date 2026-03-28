@@ -49,9 +49,32 @@ exports.register = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (!verifiedOTP) {
-      return res.status(400).json({
+      // Auto-generate OTP and return it for display on screen
+      const crypto = require('crypto');
+      const generatedOTP = crypto.randomInt(100000, 999999).toString();
+      
+      // Delete any existing unverified OTPs for this email
+      await OTP.deleteMany({ 
+        email: email.toLowerCase(), 
+        verified: false 
+      });
+
+      // Create new OTP
+      await OTP.create({
+        email: email.toLowerCase(),
+        otp: generatedOTP,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+      });
+
+      return res.status(200).json({
         success: false,
-        message: 'Email not verified. Please verify your email with OTP first.'
+        message: 'Please verify your email with OTP',
+        requiresOTP: true,
+        data: {
+          otp: generatedOTP, // Return OTP to display on screen
+          email: email.toLowerCase(),
+          expiresIn: '10 minutes'
+        }
       });
     }
 

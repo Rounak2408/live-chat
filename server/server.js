@@ -1,8 +1,4 @@
-/**
- * Main Server File
- * Production-ready Express server with Socket.io for real-time communication
- * MongoDB connection using Mongoose with dotenv configuration
- */
+
 
 require('dotenv').config();
 const express = require('express');
@@ -13,17 +9,13 @@ const path = require('path');
 const connectDB = require('./config/database');
 const setupSocketHandlers = require('./socket/socketHandlers');
 
-// Connect to MongoDB
+
 connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
-/**
- * CORS (TEMP: allow all origins to guarantee fix)
- * Note: credentials must be false when origin is "*"
- * IMPORTANT: CORS middleware must be registered before routes.
- */
+
 const corsOptions = {
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -96,9 +88,25 @@ app.use((req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0'; // Listen on all interfaces for network access
+server.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
   console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 Local access: http://localhost:${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Error: Port ${PORT} is already in use!`);
+    console.error(`💡 Solutions:`);
+    console.error(`   1. Kill the process using port ${PORT}:`);
+    console.error(`      Windows: netstat -ano | findstr :${PORT}`);
+    console.error(`      Then: taskkill /PID <PID> /F`);
+    console.error(`   2. Use a different port by setting PORT in .env file`);
+    console.error(`   3. Or change the default port in server.js`);
+    process.exit(1);
+  } else {
+    console.error('❌ Server Error:', err);
+    process.exit(1);
+  }
 });
 
 // Handle unhandled promise rejections

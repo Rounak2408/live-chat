@@ -55,16 +55,13 @@ exports.generateOTP = async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
     });
 
-    // In development, return OTP in response
-    // In production, this would be sent via email/SMS
-    const isDevelopment = process.env.NODE_ENV !== 'production';
-
+    // Always return OTP in response for display on screen
     res.status(200).json({
       success: true,
       message: 'OTP generated successfully',
       data: {
         email: email.toLowerCase(),
-        ...(isDevelopment && { otp }), // Only show OTP in development
+        otp: otp, // Always return OTP to display on screen
         expiresIn: '10 minutes'
       }
     });

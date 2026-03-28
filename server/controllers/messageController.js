@@ -94,12 +94,32 @@ exports.getChatMessages = async (req, res) => {
     const { chatId } = req.params;
     const userId = req.user.id;
 
+    // Validate chatId format
+    if (!mongoose.Types.ObjectId.isValid(chatId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid chat ID format'
+      });
+    }
+
     // Verify chat exists
     const chat = await Chat.findById(chatId);
     if (!chat) {
       return res.status(404).json({
         success: false,
         message: 'Chat not found'
+      });
+    }
+
+    // Check if user is a participant in the chat
+    const isParticipant = chat.participants.some(
+      p => p.toString() === userId.toString()
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have access to this chat'
       });
     }
 

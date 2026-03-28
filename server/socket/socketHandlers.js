@@ -97,11 +97,31 @@ module.exports = function setupSocketHandlers(io) {
           return;
         }
 
-        // Verify chat exists (no strict participant check to avoid blocking)
+        // Verify chat exists
         const chat = await Chat.findById(chatId);
         if (chat) {
-          socket.join(`chat-${chatId}`);
-          console.log(`🚪 User ${userId} joined chat ${chatId}`);
+          // Ensure user is a participant
+          const participantIds = chat.participants.map(p => p.toString());
+          const isParticipant = participantIds.includes(userId.toString());
+          
+          if (isParticipant) {
+            socket.join(`chat-${chatId}`);
+            console.log(`🚪 User ${userId} joined chat ${chatId}`);
+            
+            // Emit confirmation to client
+            socket.emit('room-joined', { 
+              chatId, 
+              message: 'Successfully joined chat' 
+            });
+          } else {
+            console.warn(`⚠️ User ${userId} tried to join chat ${chatId} but is not a participant`);
+            socket.emit('error', { 
+              message: 'You are not a member of this chat. Please rejoin the room.' 
+            });
+          }
+        } else {
+          console.error(`Chat ${chatId} not found for join request`);
+          socket.emit('error', { message: 'Chat not found' });
         }
       } catch (error) {
         console.error('Error in join-chat:', error);
@@ -156,13 +176,24 @@ module.exports = function setupSocketHandlers(io) {
         // Verify chat exists
         const chat = await Chat.findById(chatId);
         if (!chat) {
+          console.error(`Chat ${chatId} not found`);
           socket.emit('error', { message: 'Chat not found' });
           return;
         }
 
+        // Check if sender is a participant in the chat
+        const participantIds = chat.participants.map(p => p.toString());
+        const isParticipant = participantIds.includes(senderId.toString());
+        
+        if (!isParticipant) {
+          console.error(`User ${senderId} is not a participant in chat ${chatId}`);
+          socket.emit('error', { message: 'You are not a member of this chat. Please rejoin the room.' });
+          return;
+        }
+
         // Check if sender is blocked
-        const participants = chat.participants.filter(p => p.toString() !== senderId);
-        for (const participantId of participants) {
+        const otherParticipants = chat.participants.filter(p => p.toString() !== senderId);
+        for (const participantId of otherParticipants) {
           const isBlocked = await BlockedUser.findOne({
             userId: participantId,
             blockedUserId: senderId

@@ -1,10 +1,5 @@
 (() => {
-  // API base URL: local = '', production = your deployed backend
-  const API_BASE =
-    window.API_BASE ||
-    ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-      ? ''
-      : 'https://live-chat-1-1ku0.onrender.com');
+  const API_BASE = typeof window.API_BASE === 'string' ? window.API_BASE : '';
   const form = document.getElementById('loginForm');
   const emailEl = document.getElementById('loginEmail');
   const passwordEl = document.getElementById('loginPassword');

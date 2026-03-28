@@ -3,12 +3,7 @@
  * Handles real-time messaging using Socket.io
  */
 
-// API base URL: local = '', production = your deployed backend
-const API_BASE =
-  window.API_BASE ||
-  ((location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-    ? ''
-    : 'https://live-chat-1-1ku0.onrender.com');
+const API_BASE = typeof window.API_BASE === 'string' ? window.API_BASE : '';
 
 const token = sessionStorage.getItem('token');
 const username = sessionStorage.getItem('username');
@@ -21,11 +16,69 @@ if (!username || !userId || !token || !roomName) {
     window.location.href = '/index.html';
 }
 
+// Clean up invalid roomId from sessionStorage if it's an object (stored incorrectly)
+if (roomId) {
+    try {
+        // Try to parse as JSON (if it was stored as object string)
+        const parsed = JSON.parse(roomId);
+        if (typeof parsed === 'object' && parsed._id) {
+            console.warn('Found object in sessionStorage, cleaning up...');
+            sessionStorage.removeItem('roomId');
+            roomId = null;
+        }
+    } catch (e) {
+        // Not JSON, check if it's a valid string ID
+        if (typeof roomId !== 'string' || !/^[0-9a-fA-F]{24}$/.test(roomId)) {
+            console.warn('Invalid roomId format in sessionStorage, will fetch fresh');
+            sessionStorage.removeItem('roomId');
+            roomId = null;
+        }
+    }
+}
+
+// Helper function to extract string ID from various formats
+function extractStringId(value) {
+    if (!value) return null;
+    
+    // If already a valid string ID
+    if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
+        return value;
+    }
+    
+    // If it's an object, try to extract _id
+    if (typeof value === 'object') {
+        // Try _id first
+        if (value._id) {
+            const id = typeof value._id === 'string' ? value._id : 
+                      (value._id.toString ? value._id.toString() : String(value._id));
+            if (/^[0-9a-fA-F]{24}$/.test(id)) {
+                return id;
+            }
+        }
+        // Try direct toString
+        if (value.toString) {
+            const id = value.toString();
+            if (/^[0-9a-fA-F]{24}$/.test(id)) {
+                return id;
+            }
+        }
+    }
+    
+    // Try converting to string
+    const strId = String(value);
+    if (/^[0-9a-fA-F]{24}$/.test(strId)) {
+        return strId;
+    }
+    
+    return null;
+}
+
 // Ensure we have a valid chatId - fetch from backend if sessionStorage has invalid value
 async function ensureChatId() {
-    // Check if we have a valid chatId string
-    if (roomId && typeof roomId === 'string' && /^[0-9a-fA-F]{24}$/.test(roomId)) {
-        return roomId;
+    // Try to extract valid ID from sessionStorage first
+    const extractedId = extractStringId(roomId);
+    if (extractedId) {
+        return extractedId;
     }
 
     // If invalid or missing, fetch from backend using roomName
@@ -39,29 +92,35 @@ async function ensureChatId() {
         });
         const result = await response.json();
 
-        if (!response.ok || !result.success || !result.data || !result.data.chatId) {
+        if (!response.ok || !result.success || !result.data) {
             console.error('Failed to fetch chatId:', result);
             showError(result.message || 'Failed to load chat. Please go back and join again.');
             return null;
         }
 
-        // Extract and validate chatId
-        let chatId = result.data.chatId;
-        if (typeof chatId !== 'string') {
-            chatId = chatId.toString ? chatId.toString() : (chatId._id ? chatId._id.toString() : String(chatId));
-        }
-
-        if (!/^[0-9a-fA-F]{24}$/.test(chatId)) {
-            console.error('Invalid chatId format from backend:', chatId);
-            showError('Invalid chat ID format');
+        // Extract chatId from response - could be in result.data.chatId or result.data.room.chatId
+        let chatIdObj = result.data.chatId || result.data.room?.chatId;
+        
+        if (!chatIdObj) {
+            console.error('No chatId in response:', result.data);
+            showError('Chat ID not found in response. Please rejoin the room.');
             return null;
         }
 
-        // Update sessionStorage with correct chatId
+        // Extract string ID using helper function
+        const chatId = extractStringId(chatIdObj);
+        
+        if (!chatId) {
+            console.error('Could not extract valid chatId from:', chatIdObj);
+            showError('Invalid chat ID format. Please rejoin the room.');
+            return null;
+        }
+
+        // Update sessionStorage with correct chatId (string only)
         roomId = chatId;
-        sessionStorage.setItem('roomId', roomId);
-        console.log('ChatId resolved:', roomId);
-        return roomId;
+        sessionStorage.setItem('roomId', chatId);
+        console.log('✅ ChatId resolved and saved:', chatId);
+        return chatId;
     } catch (error) {
         console.error('Error fetching chatId:', error);
         showError('Error loading chat. Please try again.');
@@ -73,18 +132,40 @@ async function ensureChatId() {
 const socket = io({
     auth: {
         token: token
-    }
+    },
+    transports: ['websocket', 'polling'], // Ensure both transports are available
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 5
 });
 
 // Connect user to socket (user-online event)
 socket.on('connect', () => {
+    console.log('✅ Socket connected, ID:', socket.id);
     socket.emit('user-online');
     // Join chat using chatId from session
     ensureChatId().then((chatId) => {
         if (chatId) {
             socket.emit('join-chat', { chatId });
+            console.log('Joined chat:', chatId);
+            // Verify join was successful
+            socket.once('room-joined', () => {
+                console.log('✅ Successfully joined chat room');
+            });
+        } else {
+            console.error('❌ Could not get chatId to join');
         }
     });
+});
+
+socket.on('disconnect', () => {
+    console.warn('❌ Socket disconnected');
+    showError('Connection lost. Please refresh the page.');
+});
+
+socket.on('connect_error', (error) => {
+    console.error('Socket connection error:', error);
+    showError('Failed to connect to server. Please check your connection.');
 });
 
 // Display room name
@@ -104,10 +185,28 @@ async function loadMessages() {
                 'Authorization': `Bearer ${token}`
             }
         });
+        
         const result = await response.json();
         
-        if (!result.success) {
-            throw new Error(result.message || 'Failed to load messages');
+        if (!response.ok || !result.success) {
+            const errorMsg = result.message || 'Failed to load messages';
+            console.error('Messages API Error:', errorMsg, result);
+            
+            // Show specific error message
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (response.status === 404) {
+                messagesContainer.innerHTML = '<div class="loading" style="color: #f04747;">Chat not found. Please go back and join the room again.</div>';
+            } else if (response.status === 403) {
+                messagesContainer.innerHTML = '<div class="loading" style="color: #f04747;">You do not have access to this chat. Please rejoin the room.</div>';
+            } else if (response.status === 401) {
+                messagesContainer.innerHTML = '<div class="loading" style="color: #f04747;">Session expired. Please login again.</div>';
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
+            } else {
+                messagesContainer.innerHTML = `<div class="loading" style="color: #f04747;">${errorMsg}</div>`;
+            }
+            return;
         }
         
         const messages = result.data.messages || [];
@@ -128,8 +227,11 @@ async function loadMessages() {
         scrollToBottom();
     } catch (error) {
         console.error('Error loading messages:', error);
-        document.getElementById('messagesContainer').innerHTML = 
-            '<div class="loading">Error loading messages</div>';
+        const messagesContainer = document.getElementById('messagesContainer');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = 
+                '<div class="loading" style="color: #f04747;">Error loading messages. Please refresh the page.</div>';
+        }
     }
 }
 
@@ -142,7 +244,13 @@ function displayMessage(message) {
     const senderId = message.senderId?._id || message.senderId || message.sender?._id || message.senderId;
     const isMe = senderId && userId ? String(senderId) === String(userId) : senderName === username;
     messageDiv.className = `chat-msg ${isMe ? 'is-me' : 'is-them'}`;
-    if (message._id) messageDiv.dataset.messageId = String(message._id);
+    if (message._id) {
+        messageDiv.dataset.messageId = String(message._id);
+        // Store timeout ID if it's an optimistic message
+        if (message._timeoutId) {
+            messageDiv.dataset.timeoutId = message._timeoutId;
+        }
+    }
     
     const dateSource = message.createdAt || message.timestamp || Date.now();
     const timestamp = new Date(dateSource).toLocaleTimeString('en-US', {
@@ -187,7 +295,7 @@ function displayNotification(message) {
 const messageInputEl = document.getElementById('messageInput');
 
 // Handle message form submission
-document.getElementById('messageForm').addEventListener('submit', (e) => {
+document.getElementById('messageForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const content = (messageInputEl?.value || '').trim();
@@ -196,19 +304,67 @@ document.getElementById('messageForm').addEventListener('submit', (e) => {
         return;
     }
 
-    // Send message via socket (needs chatId, not roomName)
-    ensureChatId().then((chatId) => {
-        if (chatId) {
-            socket.emit('send-message', {
-                chatId,
-                text: content
-            });
-            // Clear input only after we have chatId
-            if (messageInputEl) messageInputEl.value = '';
-        } else {
+    // Check if socket is connected
+    if (!socket || !socket.connected) {
+        showError('Not connected to server. Please refresh the page.');
+        console.error('Socket not connected');
+        return;
+    }
+
+    try {
+        // Get chatId
+        const chatId = await ensureChatId();
+        
+        if (!chatId) {
             showError('Chat ID not found. Please go back and re-join the room.');
+            return;
         }
-    });
+
+        console.log('Sending message:', { chatId, content, socketConnected: socket.connected });
+
+        // Create optimistic message (show immediately)
+        const tempMessageId = 'temp-' + Date.now();
+        const tempMessage = {
+            _id: tempMessageId,
+            text: content,
+            senderId: { _id: userId, name: username },
+            createdAt: new Date(),
+            isOptimistic: true
+        };
+        displayMessage(tempMessage);
+
+        // Clear input immediately for better UX
+        if (messageInputEl) messageInputEl.value = '';
+
+        // Send message via socket
+        console.log('Emitting send-message:', { chatId, text: content, socketId: socket.id });
+        
+        // Set timeout to remove optimistic message if not confirmed within 5 seconds
+        const optimisticTimeout = setTimeout(() => {
+            const optimisticMsg = document.querySelector(`[data-message-id="${tempMessageId}"]`);
+            if (optimisticMsg) {
+                console.warn('Optimistic message not confirmed, removing...');
+                optimisticMsg.remove();
+                showError('Message may not have been sent. Please try again.');
+            }
+        }, 5000);
+        
+        // Store timeout ID to clear if message is confirmed
+        tempMessage._timeoutId = optimisticTimeout;
+        
+        socket.emit('send-message', {
+            chatId,
+            text: content
+        });
+        
+        console.log('✅ Message emit completed');
+    } catch (error) {
+        console.error('Error sending message:', error);
+        showError('Failed to send message. Please try again.');
+        // Remove optimistic message on error
+        const optimisticMsg = document.querySelector(`[data-message-id^="temp-"]`);
+        if (optimisticMsg) optimisticMsg.remove();
+    }
 });
 
 // Socket event handlers
@@ -217,12 +373,30 @@ document.getElementById('messageForm').addEventListener('submit', (e) => {
 socket.on('new-message', (data) => {
     // Handle both old format (data) and new format (data.data.message)
     const message = data.data?.message || data;
-    displayMessage(message);
+    
+    console.log('📨 New message received:', message);
+    
+    // Remove optimistic message if this is the confirmed version
+    if (message._id && !message._id.startsWith('temp-')) {
+        // Find and remove all optimistic messages
+        const optimisticMsgs = document.querySelectorAll(`[data-message-id^="temp-"]`);
+        optimisticMsgs.forEach(msg => {
+            const timeoutId = msg.dataset.timeoutId;
+            if (timeoutId) clearTimeout(parseInt(timeoutId));
+            msg.remove();
+        });
+    }
+    
+    // Don't show duplicate messages (if optimistic already shown)
+    const existingMsg = document.querySelector(`[data-message-id="${message._id}"]`);
+    if (!existingMsg || message._id.startsWith('temp-')) {
+        displayMessage(message);
+    }
 
     // If message is from someone else, immediately send "seen" ack
     const senderId = message.senderId?._id || message.senderId;
     const isMe = senderId && userId ? String(senderId) === String(userId) : false;
-    if (!isMe && message._id) {
+    if (!isMe && message._id && !message._id.startsWith('temp-')) {
         ensureChatId().then((chatId) => {
             if (chatId) socket.emit('message-seen', { chatId, messageId: String(message._id) });
         });
@@ -270,8 +444,20 @@ socket.on('online-users-updated', async () => {
 
 // Error handler
 socket.on('error', (data) => {
-    showError(data.message);
+    const errorMsg = data?.message || 'An error occurred';
+    console.error('Socket error:', errorMsg, data);
+    showError(errorMsg);
+    
+    // If error is about not being a participant, suggest rejoining
+    if (errorMsg.includes('not a member') || errorMsg.includes('not a participant')) {
+        setTimeout(() => {
+            if (confirm('You need to rejoin the room. Go back and join again?')) {
+                window.location.href = '/options.html';
+            }
+        }, 2000);
+    }
 });
+
 
 // Update online users list
 async function updateOnlineUsers() {

@@ -167,17 +167,28 @@ exports.joinRoomByName = async (req, res) => {
     }
 
     // Add user to members if not already present
-    const isMember = room.members.some(m => m._id.toString() === userId);
+    // Handle both populated and non-populated members
+    const memberIds = room.members.map(m => 
+      (typeof m === 'object' && m._id) ? m._id.toString() : m.toString()
+    );
+    const isMember = memberIds.includes(userId.toString());
+    
     if (!isMember) {
       room.members.push(userId);
       await room.save();
+      // Update memberIds after adding
+      memberIds.push(userId.toString());
     }
 
     // Ensure a chat exists and is linked
     let chatId = room.chatId;
     if (!chatId) {
+      // Get all member IDs (including newly added user)
+      const allMemberIds = room.members.map(m => 
+        (typeof m === 'object' && m._id) ? m._id : m
+      );
       const chat = await Chat.create({
-        participants: room.members,
+        participants: allMemberIds,
         isGroup: true
       });
       room.chatId = chat._id;
@@ -188,13 +199,16 @@ exports.joinRoomByName = async (req, res) => {
     // Ensure the chat's participants list includes this user
     const chatDoc = await Chat.findById(chatId);
     if (chatDoc) {
-      const hasParticipant = chatDoc.participants.some(
-        (p) => p.toString() === userId
-      );
+      const participantIds = chatDoc.participants.map(p => p.toString());
+      const hasParticipant = participantIds.includes(userId.toString());
+      
       if (!hasParticipant) {
         chatDoc.participants.push(userId);
         await chatDoc.save();
+        console.log(`Added user ${userId} to chat ${chatId} participants`);
       }
+    } else {
+      console.error(`Chat ${chatId} not found after join`);
     }
 
     // Ensure chatId is a string (not ObjectId object)
