@@ -18,6 +18,8 @@
     --discord-text: #ffffff;
     --discord-text-muted: #b9bbbe;
     --discord-border: rgba(255, 255, 255, 0.1);
+    /* Chat room message pane background (GIF or local: url("/images/your-bg.gif")) */
+    --chat-messages-bg-gif: url("https://media.giphy.com/media/l0MYt5jPRWI6yh9qs/giphy.gif");
 }
 
 body {
@@ -746,7 +748,7 @@ body::after {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: #313338;
+    background: #1e1f22;
 }
 
 .chat-topbar {
@@ -768,21 +770,66 @@ body::after {
 
 .chat-messages {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
+    isolation: isolate;
+    background: #232428;
+}
+
+/* Animated GIF layer */
+.chat-messages::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--chat-messages-bg-gif);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.42;
+    pointer-events: none;
+}
+
+/* Readability: dark veil + subtle vignette */
+.chat-messages::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 120% 80% at 50% 20%, rgba(88, 101, 242, 0.12), transparent 55%),
+        linear-gradient(180deg, rgba(18, 19, 22, 0.82) 0%, rgba(18, 19, 22, 0.92) 45%, rgba(15, 16, 19, 0.94) 100%);
+}
+
+.chat-messages > * {
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-messages::before {
+        opacity: 0;
+        background-image: none;
+    }
 }
 
 .chat-note { display: flex; justify-content: center; }
 .chat-note-pill {
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: #b5bac1;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #dbdee1;
     font-size: 12px;
     padding: 6px 10px;
     border-radius: 999px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .chat-msg {
@@ -791,8 +838,16 @@ body::after {
     gap: 10px;
     padding: 10px 10px;
     border-radius: 12px;
+    background: rgba(30, 31, 34, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
-.chat-msg:hover { background: rgba(255,255,255,0.04); }
+.chat-msg:hover {
+    background: rgba(38, 40, 45, 0.88);
+    border-color: rgba(255, 255, 255, 0.1);
+}
 
 .chat-msg-avatar {
     width: 36px;
