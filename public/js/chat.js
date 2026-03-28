@@ -90,7 +90,15 @@ async function ensureChatId() {
                 'Authorization': `Bearer ${token}`
             }
         });
-        const result = await response.json();
+        const raw = await response.text();
+        let result = {};
+        try {
+            result = raw ? JSON.parse(raw) : {};
+        } catch {
+            console.error('Join room response not JSON:', response.status, raw.slice(0, 200));
+            showError('Could not reach server. Check api-base URL and login again.');
+            return null;
+        }
 
         if (!response.ok || !result.success || !result.data) {
             console.error('Failed to fetch chatId:', result);
@@ -120,6 +128,14 @@ async function ensureChatId() {
         roomId = chatId;
         sessionStorage.setItem('roomId', chatId);
         console.log('✅ ChatId resolved and saved:', chatId);
+
+        if (result.data.room && Array.isArray(result.data.room.members)) {
+            currentRoomUsers = result.data.room.members.map((m) =>
+                typeof m === 'object' ? m.name || m.email || 'User' : String(m)
+            );
+            updateRoomUsers();
+        }
+
         return chatId;
     } catch (error) {
         console.error('Error fetching chatId:', error);
@@ -179,14 +195,38 @@ async function loadMessages() {
             throw new Error('Chat ID could not be resolved');
         }
 
-        const response = await fetch(`${API_BASE}/api/messages/${chatId}`, {
+        let response = await fetch(`${API_BASE}/api/messages/${chatId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        
-        const result = await response.json();
-        
+
+        let raw = await response.text();
+        let result = {};
+        try {
+            result = raw ? JSON.parse(raw) : {};
+        } catch {
+            console.error('Messages response not JSON:', response.status, raw.slice(0, 200));
+            throw new Error('Invalid response from server');
+        }
+
+        // Re-sync room (adds you as participant) then retry once on 403
+        if (response.status === 403) {
+            const freshId = await ensureChatId();
+            if (!freshId) {
+                throw new Error('Still no access. Re-open the room from Options.');
+            }
+            response = await fetch(`${API_BASE}/api/messages/${freshId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            raw = await response.text();
+            try {
+                result = raw ? JSON.parse(raw) : {};
+            } catch {
+                throw new Error('Invalid response after retry');
+            }
+        }
+
         if (!response.ok || !result.success) {
             const errorMsg = result.message || 'Failed to load messages';
             console.error('Messages API Error:', errorMsg, result);
@@ -228,8 +268,11 @@ async function loadMessages() {
         console.error('Error loading messages:', error);
         const messagesContainer = document.getElementById('messagesContainer');
         if (messagesContainer) {
-            messagesContainer.innerHTML = 
-                '<div class="loading" style="color: #f04747;">Error loading messages. Please refresh the page.</div>';
+            const hint =
+                error && error.message
+                    ? error.message
+                    : 'Please go back to Options, open the room again, or refresh.';
+            messagesContainer.innerHTML = `<div class="loading" style="color: #f04747;">Could not load messages. ${hint}</div>`;
         }
     }
 }
@@ -429,9 +472,11 @@ socket.on('user-left', (data) => {
     updateRoomUsers();
 });
 
-// Room joined successfully
+// Room joined successfully (server sends participant display names)
 socket.on('room-joined', (data) => {
-    currentRoomUsers = data.users || [];
+    if (Array.isArray(data.users) && data.users.length > 0) {
+        currentRoomUsers = [...data.users];
+    }
     updateRoomUsers();
     loadMessages();
 });
@@ -554,8 +599,34 @@ document.getElementById('leaveRoomBtn').addEventListener('click', () => {
     }
 });
 
-// Load initial data
-loadMessages();
+// Load initial data: resolve chatId, fill "In this room" if still empty, then messages
+(async () => {
+    await ensureChatId();
+    if (currentRoomUsers.length === 0 && roomName) {
+        try {
+            const res = await fetch(
+                `${API_BASE}/api/rooms/join/${encodeURIComponent(roomName)}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const raw = await res.text();
+            let result = {};
+            try {
+                result = raw ? JSON.parse(raw) : {};
+            } catch {
+                result = {};
+            }
+            if (result.success && result.data?.room?.members) {
+                currentRoomUsers = result.data.room.members.map((m) =>
+                    typeof m === 'object' ? m.name || m.email || 'User' : String(m)
+                );
+                updateRoomUsers();
+            }
+        } catch (e) {
+            console.warn('Sidebar sync join:', e);
+        }
+    }
+    await loadMessages();
+})();
 updateOnlineUsers();
 
 // Scroll to bottom of messages

@@ -20,6 +20,22 @@ const socketOptions = {
 };
 const socket = API_BASE ? io(API_BASE, socketOptions) : io(socketOptions);
 
+/** Never store "[object Object]" — server should send string; this handles edge cases. */
+function normalizeChatIdFromApi(value) {
+    if (!value) return null;
+    if (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) return value;
+    if (typeof value === 'object' && value._id != null) {
+        const id =
+            typeof value._id === 'string'
+                ? value._id
+                : value._id.toString
+                  ? value._id.toString()
+                  : String(value._id);
+        if (/^[0-9a-fA-F]{24}$/.test(id)) return id;
+    }
+    return null;
+}
+
 // Display username
 document.getElementById('usernameDisplay').textContent = username;
 
@@ -204,13 +220,13 @@ document.getElementById('joinRoomForm').addEventListener('submit', (e) => {
                 return;
             }
 
-            const { room, chatId } = result.data;
+            const { room } = result.data;
+            const chatId = normalizeChatIdFromApi(result.data.chatId);
             if (!room || !chatId) {
                 showError('Room or chat could not be loaded');
                 return;
             }
 
-            // Store chat/room info and go to chat page
             sessionStorage.setItem('roomName', room.roomName);
             sessionStorage.setItem('roomId', chatId);
             window.location.href = '/chat.html';
@@ -249,7 +265,12 @@ document.getElementById('createRoomForm').addEventListener('submit', (e) => {
                 return;
             }
 
-            const { room, chatId } = result.data;
+            const { room } = result.data;
+            const chatId = normalizeChatIdFromApi(result.data.chatId);
+            if (!chatId) {
+                showError('Room created but chat ID was invalid. Please refresh and open the room from your list.');
+                return;
+            }
             sessionStorage.setItem('roomName', room.roomName);
             sessionStorage.setItem('roomId', chatId);
             window.location.href = '/chat.html';

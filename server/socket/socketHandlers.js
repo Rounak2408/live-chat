@@ -107,11 +107,16 @@ module.exports = function setupSocketHandlers(io) {
           if (isParticipant) {
             socket.join(`chat-${chatId}`);
             console.log(`🚪 User ${userId} joined chat ${chatId}`);
-            
-            // Emit confirmation to client
-            socket.emit('room-joined', { 
-              chatId, 
-              message: 'Successfully joined chat' 
+
+            const populated = await Chat.findById(chatId).populate('participants', 'name email');
+            const users = populated
+              ? populated.participants.map((p) => p.name || p.email || 'User')
+              : [];
+
+            socket.emit('room-joined', {
+              chatId,
+              message: 'Successfully joined chat',
+              users
             });
           } else {
             console.warn(`⚠️ User ${userId} tried to join chat ${chatId} but is not a participant`);

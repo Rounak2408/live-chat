@@ -3,9 +3,25 @@
  * Handles room-related operations
  */
 
+const mongoose = require('mongoose');
 const Room = require('../models/Room');
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
+
+/** Room.chatId may be ObjectId or populated Chat; never use Object.prototype.toString (gives "[object Object]"). */
+function toChatIdString(chatRef) {
+  if (chatRef == null) return null;
+  if (typeof chatRef === 'string' && mongoose.Types.ObjectId.isValid(chatRef)) return chatRef;
+  if (chatRef instanceof mongoose.Types.ObjectId) return chatRef.toString();
+  if (typeof chatRef === 'object' && chatRef._id != null) {
+    return toChatIdString(chatRef._id);
+  }
+  return null;
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 /**
  * @desc    Create a new room
@@ -127,8 +143,7 @@ exports.getRoomById = async (req, res) => {
       });
     }
 
-    // Ensure chatId is a string
-    const chatIdString = room.chatId ? (room.chatId.toString ? room.chatId.toString() : (room.chatId._id ? room.chatId._id.toString() : room.chatId)) : null;
+    const chatIdString = toChatIdString(room.chatId);
 
     res.status(200).json({
       success: true,
@@ -151,10 +166,19 @@ exports.getRoomById = async (req, res) => {
  */
 exports.joinRoomByName = async (req, res) => {
   try {
-    const { roomName } = req.params;
+    const { roomName: roomNameParam } = req.params;
     const userId = req.user.id;
+    const decoded = (roomNameParam || '').trim();
+    if (!decoded) {
+      return res.status(400).json({
+        success: false,
+        message: 'Room name is required'
+      });
+    }
 
-    let room = await Room.findOne({ roomName })
+    let room = await Room.findOne({
+      roomName: new RegExp(`^${escapeRegex(decoded)}$`, 'i')
+    })
       .populate('members', 'name email')
       .populate('adminId', 'name email')
       .populate('chatId');
@@ -180,11 +204,10 @@ exports.joinRoomByName = async (req, res) => {
       memberIds.push(userId.toString());
     }
 
-    // Ensure a chat exists and is linked
-    let chatId = room.chatId;
-    if (!chatId) {
-      // Get all member IDs (including newly added user)
-      const allMemberIds = room.members.map(m => 
+    // Ensure a chat exists and is linked (room.chatId may be populated Chat doc)
+    let chatIdRef = room.chatId;
+    if (!chatIdRef) {
+      const allMemberIds = room.members.map(m =>
         (typeof m === 'object' && m._id) ? m._id : m
       );
       const chat = await Chat.create({
@@ -193,26 +216,31 @@ exports.joinRoomByName = async (req, res) => {
       });
       room.chatId = chat._id;
       await room.save();
-      chatId = chat._id;
+      chatIdRef = chat._id;
     }
 
-    // Ensure the chat's participants list includes this user
-    const chatDoc = await Chat.findById(chatId);
+    const chatIdString = toChatIdString(chatIdRef);
+    if (!chatIdString) {
+      console.error('joinRoomByName: could not resolve chatId', chatIdRef);
+      return res.status(500).json({
+        success: false,
+        message: 'Room chat is misconfigured. Please contact support.'
+      });
+    }
+
+    const chatDoc = await Chat.findById(chatIdString);
     if (chatDoc) {
       const participantIds = chatDoc.participants.map(p => p.toString());
       const hasParticipant = participantIds.includes(userId.toString());
-      
+
       if (!hasParticipant) {
         chatDoc.participants.push(userId);
         await chatDoc.save();
-        console.log(`Added user ${userId} to chat ${chatId} participants`);
+        console.log(`Added user ${userId} to chat ${chatIdString} participants`);
       }
     } else {
-      console.error(`Chat ${chatId} not found after join`);
+      console.error(`Chat ${chatIdString} not found after join`);
     }
-
-    // Ensure chatId is a string (not ObjectId object)
-    const chatIdString = chatId.toString ? chatId.toString() : (chatId._id ? chatId._id.toString() : chatId);
 
     res.status(200).json({
       success: true,
