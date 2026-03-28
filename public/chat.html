@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="api-base" content="">
     <title>Chat Room - Real-Time Chat</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -93,7 +94,9 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/api-config.js"></script>
+    <!-- CDN: works on Netlify; same server still OK on Render -->
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js" crossorigin="anonymous"></script>
     <script src="js/chat.js"></script>
 </body>
 </html>

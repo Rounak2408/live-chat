@@ -1,6 +1,5 @@
 (() => {
-  // Same-origin: '' (Express serves /public — works on localhost and your real deploy URL).
-  // Split hosting (e.g. Netlify + Render): set before this script — <script>window.API_BASE='https://your-api.onrender.com'</script>
+  // API: meta api-base (see register.html) or window.API_BASE; empty = same origin as this page
   const API_BASE = typeof window.API_BASE === 'string' ? window.API_BASE : '';
   const registerForm = document.getElementById('registerForm');
   const errEl = document.getElementById('registerError');
@@ -201,11 +200,17 @@
         data = rawText ? JSON.parse(rawText) : {};
       } catch (parseErr) {
         console.error('Register response not JSON:', res.status, rawText.slice(0, 200));
-        showError(
-          res.ok
-            ? 'Server sent invalid response. Check that the API URL is correct.'
-            : `Server error (${res.status}). Is the backend running?`
-        );
+        if (res.status === 404) {
+          showError(
+            'API not found (404). Frontend is separate from backend: in register.html set <meta name="api-base" content="https://YOUR-RENDER-URL"> (no trailing slash), redeploy, or deploy the whole app on Render only.'
+          );
+        } else {
+          showError(
+            res.ok
+              ? 'Server sent invalid response. Check api-base URL.'
+              : `Server error (${res.status}). Is the backend running?`
+          );
+        }
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Create Account';
@@ -235,8 +240,13 @@
       }
 
       if (!res.ok || !data.success) {
+        let errMsg = data.message;
+        if (!errMsg && res.status === 404) {
+          errMsg =
+            'API not found (404). Set <meta name="api-base" content="https://your-backend.onrender.com"> in this page and redeploy.';
+        }
         showError(
-          data.message ||
+          errMsg ||
             (res.status >= 500 ? 'Server error. Try again later.' : `Registration failed (${res.status}).`)
         );
         if (submitBtn) {

@@ -128,16 +128,15 @@ async function ensureChatId() {
     }
 }
 
-// Connect socket with JWT token
-const socket = io({
-    auth: {
-        token: token
-    },
-    transports: ['websocket', 'polling'], // Ensure both transports are available
+// Connect socket to same host as API (required when frontend is on Netlify, API on Render)
+const socketOptions = {
+    auth: { token },
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionAttempts: 5
-});
+};
+const socket = API_BASE ? io(API_BASE, socketOptions) : io(socketOptions);
 
 // Connect user to socket (user-online event)
 socket.on('connect', () => {

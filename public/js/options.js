@@ -15,12 +15,10 @@ if (!username || !userId || !token) {
     window.location.href = '/index.html';
 }
 
-// Connect socket with JWT token
-const socket = io({
-    auth: {
-        token: token
-    }
-});
+const socketOptions = {
+    auth: { token }
+};
+const socket = API_BASE ? io(API_BASE, socketOptions) : io(socketOptions);
 
 // Display username
 document.getElementById('usernameDisplay').textContent = username;
